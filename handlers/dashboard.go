@@ -114,10 +114,10 @@ func (h backend) dashboard(w http.ResponseWriter, r *http.Request) error {
 		log.Error(r.Context(), err)
 	}
 
-	// Filter out empty domains (e.g. from the root "/" path)
+	// Filter out empty domains (e.g. from the root "/" path) and invalid ones
 	var validDomains []string
 	for _, d := range trackedDomains {
-		if d != "" && d != " " {
+		if d != "" && d != " " && strings.Contains(d, ".") {
 			validDomains = append(validDomains, d)
 		}
 	}

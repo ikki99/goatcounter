@@ -81,7 +81,7 @@
 			<strong style="color: var(--text-secondary); font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.05em;">过滤域名:</strong>
 			<a href="?" class="btn {{if not .View.Filter}}active{{end}}" style="padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 0.9em; transition: all 0.2s; background: {{if not .View.Filter}}var(--accent){{else}}var(--bg-surface-2){{end}}; color: {{if not .View.Filter}}#fff{{else}}var(--text){{end}};">全部 (All)</a>
 			{{range .TrackedDomains}}
-				{{$filterVal := printf "at:start %s" .}}
+				{{$filterVal := printf "%s" .}}
 				<a href="?filter={{$filterVal | urlquery}}" class="btn {{if eq $.View.Filter $filterVal}}active{{end}}" style="padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 0.9em; transition: all 0.2s; background: {{if eq $.View.Filter $filterVal}}var(--accent){{else}}var(--bg-surface-2){{end}}; color: {{if eq $.View.Filter $filterVal}}#fff{{else}}var(--text){{end}};">{{.}}</a>
 			{{end}}
 		</div>
