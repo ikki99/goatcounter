@@ -1416,6 +1416,20 @@ func (h api) trackedDomains(w http.ResponseWriter, r *http.Request) error {
 	site := goatcounter.MustGetSite(r.Context())
 	uniqueDomains := make(map[string]struct{})
 
+	// 1. Add domains from site config
+	if site.Cname != nil && *site.Cname != "" {
+		uniqueDomains[*site.Cname] = struct{}{}
+	}
+	if site.LinkDomain != "" {
+		d := site.LinkDomain
+		d = strings.TrimPrefix(d, "http://")
+		d = strings.TrimPrefix(d, "https://")
+		d = strings.Split(d, "/")[0]
+		if d != "" && strings.Contains(d, ".") {
+			uniqueDomains[d] = struct{}{}
+		}
+	}
+
 	// 2. Add domains from paths
 	var paths []string
 	err = zdb.Select(r.Context(), &paths, `SELECT path FROM paths WHERE site_id = ?`, site.ID)
@@ -1437,6 +1451,7 @@ func (h api) trackedDomains(w http.ResponseWriter, r *http.Request) error {
 						}
 					}
 					if !isExt {
+						uniqueDomains[d] = struct{}{}
 					}
 				}
 			}
