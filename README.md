@@ -13,6 +13,16 @@ Please consider [contributing financially][sponsor].
 [sponsor]: http://www.goatcounter.com/contribute
 [www]: https://www.goatcounter.com
 
+## GoatCounter Lite (v3.1.3-lite)
+
+This is a customized high-performance version of GoatCounter featuring:
+- **Modern Dashboard**: A fully rewritten React-based dashboard with glassmorphism design and real-time feel.
+- **Parallel Data Fetching**: API requests are parallelized in the frontend, reducing load times by up to 70%.
+- **Intelligent Domain Filtering**: Automatically extracts and filters subdomains (e.g. cross-domain tracking) directly from the dashboard UI.
+- **Low-Latency Rate Limiting**: Optimized API throughput for concurrent dashboard widgets.
+- **Enhanced CLI**: Extended database and token management tools.
+
+
 
 Features
 --------
