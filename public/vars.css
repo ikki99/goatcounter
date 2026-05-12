@@ -6,6 +6,15 @@
     --bg-surface:        #ffffff;
     --bg-surface-2:      #f1f5f9;
     --border:            #e2e8f0;
+    --shadow:            0 1px 2px rgba(15,23,42,0.06), 0 4px 12px rgba(15,23,42,0.04);
+    --shadow-lg:         0 8px 30px rgba(15,23,42,0.08);
+
+    --chart-1:           #0d9488;
+    --chart-2:           #4f46e5;
+    --chart-3:           #d97706;
+    --chart-4:           #db2777;
+    --chart-5:           #7c3aed;
+    --chart-6:           #0891b2;
     
     --header-border:     #e2e8f0;                          /* Border below some headers */
     --backdrop:          #f8fafc;

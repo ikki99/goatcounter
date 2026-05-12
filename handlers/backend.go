@@ -3,6 +3,7 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -21,21 +22,40 @@ func NewBackend(db zdb.DB, acmeh http.HandlerFunc, dev, saas bool,
 ) chi.Router {
 
 	root := chi.NewRouter()
-	r := root
-	if basePath != "" {
-		r = chi.NewRouter()
-		root.Mount(basePath, r)
-	}
 
-	backend{dashTimeout}.Mount(r, db, dev, saas, domainStatic, dashTimeout, apiMax, ratelimits)
+	// 1. GLOBAL FORCE INTERCEPT (The most aggressive way to prevent 404)
+	root.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			path := r.URL.Path
+			if strings.HasSuffix(path, "/modern.html") {
+				serveModernHTML(domainStatic)(w, r)
+				return
+			}
+			if strings.Contains(path, "/modern-assets/") {
+				// Extract the actual file path within assets
+				idx := strings.Index(path, "/modern-assets/")
+				newPath := path[idx:]
+				r.URL.Path = newPath
+				http.StripPrefix("/modern-assets/", serveModernAssets()).ServeHTTP(w, r)
+				return
+			}
+			next.ServeHTTP(w, r)
+		})
+	})
+
+	// 2. Main backend sub-router
+	sub := chi.NewRouter()
+	backend{dashTimeout}.Mount(sub, db, dev, saas, domainStatic, dashTimeout, apiMax, ratelimits)
 
 	if acmeh != nil {
-		r.Get("/.well-known/acme-challenge/{key}", acmeh)
+		sub.Get("/.well-known/acme-challenge/{key}", acmeh)
+	}
+	if !saas {
+		NewStatic(sub, dev, saas, basePath)
 	}
 
-	if !saas {
-		NewStatic(r, dev, saas, basePath)
-	}
+	// 3. Fallback to main backend for everything else
+	root.HandleFunc("/*", sub.ServeHTTP)
 
 	return root
 }

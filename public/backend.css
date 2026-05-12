@@ -55,6 +55,27 @@ h3, h4           { margin-bottom:0; }
 h3+p, h4+p       { margin-top:0; }
 h3.border        { border-bottom:1px solid #666; margin-bottom:.2em; }
 
+/* Dashboard layout grid */
+#dash-widgets {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Card aesthetics applied to widgets */
+.pages-list, .totals, .hchart {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+    transition: border-color 0.15s ease, transform 0.15s ease;
+}
+.pages-list:hover, .totals:hover, .hchart:hover {
+    border-color: color-mix(in srgb, var(--accent) 50%, var(--border));
+    transform: translateY(-1px);
+}
+
 form .err        { color:var(--form-error-text); display:block; }
 form .disabled,
 form *[disabled] { color:var(--pageviews-text); cursor:not-allowed;}
@@ -118,14 +139,20 @@ small.go           { display: none; }
 
 /*** Pages and totals list/charts
  ********************************/
-.pages-list h2           { margin-top: .5em; }
-.count-list              { margin-top: 15px; }
-.count-list tr           { border: none; }
-.count-list td           { vertical-align: top; }
+.pages-list h2           { margin-top: 0; margin-bottom: 16px; font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; }
+.count-list              { margin-top: 0; width: 100%; border-collapse: collapse; }
+.count-list tr           { display: grid; grid-template-columns: 80px 2fr 4fr; align-items: start; gap: 16px; padding: 12px 0; border-bottom: 1px solid var(--border); position: relative; }
+.count-list tr:last-child { border-bottom: none; }
+.count-list td           { vertical-align: middle; padding: 0; min-width: 0; }
 .count-list th           { text-align: left; }
-.count-list .col-count   { width: 5rem; text-align: right; }
-.count-list .col-count-diff { font-size:.9rem; }
-.count-list .col-path    { width: 20rem; }
+.count-list .col-count   { width: 100%; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-top: 4px; }
+.count-list .col-count-diff { font-size:.75rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-left: 8px; }
+.count-list .col-path    { width: auto; font-size: 0.875rem; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Totals chart specific fixes */
+.totals .count-list tr { display: block; padding: 0; border: none; }
+.totals .count-list td { display: block; width: 100%; }
+
 .label-event             { background-color: var(--event-bg); border-radius: 1em; padding: .1em .3em; }
 .count-list td[colspan="3"] {  /* "nothing to display" */
     text-align: left;
@@ -180,22 +207,27 @@ tr.target .chart-left { display: block; }
 
 /*** Horizontal charts
  ********************/
-.hcharts            { display: flex; flex-wrap: wrap; justify-content: space-between; }
-.hcharts > div      { width: 49%; }
-@media (max-width: 45rem) {
-    .hcharts       { display: block; }
-    .hcharts > div { width: auto; }
+.hcharts { 
+    display: grid; 
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 20px; 
+}
+.hcharts > div { width: auto; } /* Reset from old flex layout */
+@media (max-width: 1024px) {
+    .hcharts { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 640px) {
+    .hcharts { grid-template-columns: 1fr; }
 }
 
-.hchart .rows >div   { position: relative; margin-bottom: .8em; }
+.hchart .rows >div   { position: relative; margin-bottom: .8em; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
 .hchart .generated .col-name { font-style: italic; }
-.hchart .col-name    { display: inline-block; width: calc(100% - 8.5rem); position: relative; }
+.hchart .col-name    { display: inline-block; width: calc(100% - 8.5rem); position: relative; font-size: 0.875rem; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hchart .cutoff      { word-break: break-all; max-width: calc(100% - 2em); }
-.hchart .bar         { position: absolute; top: 0; bottom: 0; background-color: var(--chart-fill);
-                       border: 1px solid var(--hchart-border); border-radius: 5px; transition: background-color .2s; }
-.hchart .bar-c       { position: relative; z-index: 1; padding-left: .5rem; display: block; }
-.hchart .col-count   { display: inline-block; width: 4.5rem; text-align: right; vertical-align: top; }
-.hchart .col-perc    { width: 2.5em; margin-right: .5rem; vertical-align: top; }
+.hchart .bar         { position: absolute; left: 0; bottom: 0; height: 2px; border-radius: 2px; opacity: 0.5; background: var(--accent); transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+.hchart .bar-c       { position: relative; z-index: 1; display: block; }
+.hchart .col-count   { display: inline-block; width: 4.5rem; text-align: right; vertical-align: top; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); }
+.hchart .col-perc    { width: 2.5em; margin-left: 8px; margin-right: .5rem; vertical-align: top; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-muted); }
 .hchart .load-more   { display: inline-block; margin-left: .2em; margin-top: .2em; }
 .hchart .load-detail { display: block; color: var(--text); }
 .hchart .detail      { padding: 0 3em; border-bottom: 1px solid #bbb; }
@@ -227,11 +259,12 @@ tr.target .chart-left { display: block; }
     #dash-move div:last-child { display: flex; flex-direction: column-reverse; text-align: right; align-items: end; }
 }
 
-#dash-main { display: flex; justify-content: space-between; padding: .5em 1em;
-             background-color: var(--nav-bg); border-bottom: 1px solid var(--nav-border); border-radius: 2px; }
-#dash-main input[type="text"]     { padding: .3em; }
+#dash-main { display: flex; justify-content: space-between; padding: 16px 0 24px 0;
+             background-color: transparent; border-bottom: none; flex-wrap: wrap; gap: 16px; align-items: center; }
+#dash-main input[type="text"]     { padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-surface); color: var(--text); font-size: 0.82rem; transition: border-color 0.15s ease; }
+#dash-main input[type="text"]:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-dim); }
 #dash-main input[type="checkbox"] { vertical-align: middle; }
-#dash-main .date-input            { width:9em; text-align:center; }
+#dash-main .date-input            { width:10em; text-align:center; }
 #dash-main label { text-align: right; margin-right: .4em; }
 
 #dash-select-period           { display: block; padding-left: .3em; }

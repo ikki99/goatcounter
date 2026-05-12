@@ -1061,6 +1061,7 @@ func getPerm(permFlag string) (zint.Bitflag64, error) {
 			"site_read":   goatcounter.APIPermSiteRead,
 			"site_create": goatcounter.APIPermSiteCreate,
 			"site_update": goatcounter.APIPermSiteUpdate,
+			"stats":       goatcounter.APIPermStats,
 		}[p]
 		if !ok {
 			return 0, fmt.Errorf("-perm: invalid value %q", p)

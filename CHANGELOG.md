@@ -4,6 +4,20 @@ This list is not comprehensive, and only lists new features and major changes,
 but not every minor bugfix. The goatcounter.com service generally runs the
 latest commit on the `main` branch.
 
+2026-05-12 v3.1.2-lite
+-----------------------
+
+### Fixes
+
+- Fix domain filtering in modern dashboard: include site-specific domains (CNAME
+  and LinkDomain) and filter out common file extensions from path-based domain
+  detection.
+- Update Content Security Policy (CSP) for the modern dashboard to allow
+  loading assets from gc.zgo.at and fonts.gstatic.com.
+- Fix bug in CLI where `stats` permission could not be assigned to API tokens.
+- Improve frontend domain synchronization and error handling in the modern
+  dashboard.
+
 unreleased
 ----------
 The default PostgreSQL container in compose.yaml was upgraded from PostgreSQL 17

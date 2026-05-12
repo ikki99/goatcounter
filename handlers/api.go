@@ -129,6 +129,7 @@ func (h api) mount(r chi.Router, db zdb.DB, ratelimits Ratelimits) {
 	// Note: DELETE not supported for sites and users intentionally, since it's
 	// such a dangerous operation.
 	a.Get("/api/v0/sites", zhttp.Wrap(h.siteList))
+	a.Get("/api/v0/sites/tracked-domains", zhttp.Wrap(h.trackedDomains))
 	a.Put("/api/v0/sites", zhttp.Wrap(h.siteCreate))
 	a.Get("/api/v0/sites/{id}", zhttp.Wrap(h.siteGet))
 	a.Post("/api/v0/sites/{id}", zhttp.Wrap(h.siteUpdate))  // Update all
@@ -177,7 +178,7 @@ func ResetBufferKey() {
 func (h api) auth(r *http.Request, w http.ResponseWriter, require zint.Bitflag64) error {
 	key, err := tokenFromHeader(r, w)
 	if err != nil {
-		w.Header().Set("WWW-Authenticate", "Basic realm=GoatCounter")
+		// w.Header().Set("WWW-Authenticate", "Basic realm=GoatCounter")
 		return err
 	}
 
@@ -199,10 +200,16 @@ func (h api) auth(r *http.Request, w http.ResponseWriter, require zint.Bitflag64
 	var token goatcounter.APIToken
 	err = token.ByToken(r.Context(), key)
 	if zdb.ErrNoRows(err) {
-		w.Header().Set("WWW-Authenticate", "Basic realm=GoatCounter")
+		prefix := key
+		if len(prefix) > 8 {
+			prefix = prefix[:8]
+		}
+		log.Errorf(r.Context(), "API AUTH FAILED: Token not found in database. Key prefix: %s...", prefix)
+		// w.Header().Set("WWW-Authenticate", "Basic realm=GoatCounter")
 		return guru.New(http.StatusUnauthorized, "unknown token")
 	}
 	if err != nil {
+		log.Errorf(r.Context(), "API AUTH FAILED: Database error: %s", err)
 		return err
 	}
 
@@ -469,7 +476,7 @@ type APICountRequest struct {
 
 	// Filter pageviews; accepted values:
 	//
-	//   ip     Ignore requests coming from IP addresses listed in "Settings → Ignore IP". Requires the IP field to be set.
+	//   ip     Ignore requests coming from IP addresses listed in "Settings 鈫?Ignore IP". Requires the IP field to be set.
 	//
 	// ["ip"] is used if this field isn't sent; send an empty array ([]) to not
 	// filter anything.
@@ -889,7 +896,7 @@ type (
 		// monthly value, instead of hourly.
 		//
 		// The Hourly, Daily, Weekly, and Monthly values are always included in
-		// the response – this only affects the Max value, which is useful if
+		// the response 鈥?this only affects the Max value, which is useful if
 		// you want to draw charts like the GoatCounter dashboard: you need to
 		// know the maximum Y-axis value of the chart to draw it.
 		//
@@ -913,6 +920,9 @@ type (
 
 		// Maximum number of pages to get {range: 1-100, default: 20}.
 		Limit int `json:"limit" query:"limit"`
+
+		// Filter by domain/path.
+		Filter string `json:"filter" query:"filter"`
 	}
 	apiHitsResponse struct {
 		// Sorted list of paths with their visitor and pageview count.
@@ -954,9 +964,13 @@ func (h api) hits(w http.ResponseWriter, r *http.Request) error {
 		args.End = ztime.EndOf(ztime.Now(r.Context()), ztime.Day)
 	}
 
-	includeIDs, excludeIDs, err := findPaths(r.Context(), args.PathByName, args.IncludePaths, args.ExcludePaths)
-	if err != nil {
-		return err
+	excludeIDs := make([]goatcounter.PathID, 0, len(args.ExcludePaths))
+	for _, s := range args.ExcludePaths {
+		n, err := zstrconv.ParseInt[goatcounter.PathID](s, 10)
+		if err != nil {
+			return err
+		}
+		excludeIDs = append(excludeIDs, n)
 	}
 
 	// TODO: backwards compat; remove eventually.
@@ -965,14 +979,18 @@ func (h api) hits(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	var pages goatcounter.HitLists
-	tdu, more, err := pages.List(r.Context(), ztime.NewRange(args.Start).To(args.End),
-		includeIDs, excludeIDs, args.Limit, args.Group)
+	f, err := goatcounter.PathFilterFromQuery(r.Context(), args.Filter)
+	if err != nil {
+		return err
+	}
+	total, more, err := pages.List(r.Context(), ztime.NewRange(args.Start).To(args.End),
+		f, excludeIDs, args.Limit, args.Group)
 	if err != nil {
 		return err
 	}
 
 	return zhttp.JSON(w, apiHitsResponse{
-		Total: tdu,
+		Total: total,
 		Hits:  pages,
 		More:  more,
 	})
@@ -1061,7 +1079,8 @@ type (
 		// Get values for include_paths and exclude_paths by path name, rather
 		// than path ID. This is more convenient in some cases, but also a bit
 		// slower.
-		PathByName bool `json:"path_by_name" query:"path_by_name"`
+		PathByName bool   `json:"path_by_name" query:"path_by_name"`
+		Filter     string `json:"filter" query:"filter"`
 	}
 
 	apiCountTotalResponse struct {
@@ -1118,15 +1137,22 @@ func (h api) countTotal(w http.ResponseWriter, r *http.Request) error {
 		tcErr, oErr error
 		rng         = ztime.NewRange(args.Start).To(args.End)
 	)
+	f, err := goatcounter.PathFilterFromQuery(r.Context(), args.Filter)
+	if err != nil {
+		return err
+	}
+	// TODO: combine includeIDs and f if both are set.
+	if len(args.IncludePaths) > 0 && args.Filter == "" {
+		f = includeIDs
+	}
+
 	wg.Go(func() {
 		defer log.Recover(r.Context(), func(err error) { log.Error(r.Context(), err, log.AttrHTTP(r)) })
-		// TODO(apiv2): don't have this totalEevents set to "true"; need to add
-		// parameter for it.
-		tc, tcErr = goatcounter.GetTotalCount(r.Context(), rng, includeIDs, true)
+		tc, tcErr = goatcounter.GetTotalCount(r.Context(), rng, f, true)
 	})
 	wg.Go(func() {
 		defer log.Recover(r.Context(), func(err error) { log.Error(r.Context(), err, log.AttrHTTP(r)) })
-		oErr = total.Totals(r.Context(), rng, includeIDs, goatcounter.GroupDaily, false)
+		oErr = total.Totals(r.Context(), rng, f, goatcounter.GroupDaily, false)
 	})
 	wg.Wait()
 	if tcErr != nil {
@@ -1161,7 +1187,8 @@ type (
 		Limit int `json:"limit" query:"limit"`
 
 		// Offset for pagination.
-		Offset int `json:"offset" query:"offset"`
+		Offset int    `json:"offset" query:"offset"`
+		Filter string `json:"filter" query:"filter"`
 	}
 	apiStatsResponse struct {
 		// Sorted list of paths with their visitor and pageview count.
@@ -1195,6 +1222,7 @@ func (h api) stats(w http.ResponseWriter, r *http.Request) error {
 	if _, err := h.dec.Decode(r, &args); err != nil {
 		return err
 	}
+
 	if h.apiMax > 0 && args.Limit > h.apiMax {
 		args.Limit = h.apiMax
 	}
@@ -1234,7 +1262,15 @@ func (h api) stats(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	err = f(r.Context(), ztime.NewRange(args.Start).To(args.End), includeIDs, args.Limit, args.Offset)
+	pf, err := goatcounter.PathFilterFromQuery(r.Context(), args.Filter)
+	if err != nil {
+		return err
+	}
+	// TODO: combine includeIDs and pf if both are set.
+	if len(args.IncludePaths) > 0 && args.Filter == "" {
+		pf = includeIDs
+	}
+	err = f(r.Context(), ztime.NewRange(args.Start).To(args.End), pf, args.Limit, args.Offset)
 	if err != nil {
 		return err
 	}
@@ -1373,4 +1409,64 @@ func findPaths(ctx context.Context, byName bool, includePaths, excludePaths goat
 		excludeIDs = append(excludeIDs, n)
 	}
 	return goatcounter.PathFilterFromIDs(includeIDs), excludeIDs, nil
+}
+
+func (h api) trackedDomains(w http.ResponseWriter, r *http.Request) error {
+	err := h.auth(r, w, goatcounter.APIPermStats)
+	if err != nil {
+		return err
+	}
+
+	site := goatcounter.MustGetSite(r.Context())
+
+	uniqueDomains := make(map[string]struct{})
+
+	// 1. Add domains from site config
+	if site.Cname != nil && *site.Cname != "" {
+		uniqueDomains[*site.Cname] = struct{}{}
+	}
+	if site.LinkDomain != "" {
+		d := site.LinkDomain
+		d = strings.TrimPrefix(d, "http://")
+		d = strings.TrimPrefix(d, "https://")
+		d = strings.Split(d, "/")[0]
+		if d != "" && strings.Contains(d, ".") {
+			uniqueDomains[d] = struct{}{}
+		}
+	}
+
+	// 2. Add domains from paths
+	var paths []string
+	err = zdb.Select(r.Context(), &paths, `SELECT path FROM paths WHERE site_id = ?`, site.ID)
+	if err == nil {
+		extensions := []string{".html", ".php", ".asp", ".aspx", ".jsp", ".htm", ".js", ".css", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico"}
+		for _, p := range paths {
+			if !strings.HasPrefix(p, "/") {
+				continue
+			}
+			parts := strings.Split(strings.TrimPrefix(p, "/"), "/")
+			if len(parts) > 0 {
+				d := parts[0]
+				if strings.Contains(d, ".") {
+					isExt := false
+					for _, ext := range extensions {
+						if strings.HasSuffix(strings.ToLower(d), ext) {
+							isExt = true
+							break
+						}
+					}
+					if !isExt {
+						uniqueDomains[d] = struct{}{}
+					}
+				}
+			}
+		}
+	}
+
+	var valid []string
+	for d := range uniqueDomains {
+		valid = append(valid, d)
+	}
+	slices.Sort(valid)
+	return zhttp.JSON(w, valid)
 }

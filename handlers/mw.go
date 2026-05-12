@@ -342,7 +342,13 @@ func writeCSP(b *strings.Builder, k, v string) {
 func addcsp(domainStatic string) func(http.Handler) http.Handler {
 	// gc.zgo.at is needed because the help pages require it for examples.
 	// TODO: should perhaps use self-hosted version?
-	ds := []string{header.CSPSourceSelf, "https://gc.zgo.at"}
+	ds := []string{
+		header.CSPSourceSelf,
+		"https://gc.zgo.at",
+		"https://fonts.googleapis.com",
+		"https://fonts.gstatic.com",
+		"https://unpkg.com",
+	}
 	if domainStatic != "" {
 		ds = append(ds, domainStatic)
 	}
@@ -381,11 +387,15 @@ func addcsp(domainStatic string) func(http.Handler) http.Handler {
 			}
 
 			static := staticDomains
+			connect := wss
 			switch {
 			case r.URL.Path == "/api.html" || r.URL.Path == "/bosmang/profile":
 				static = allowInline
 			case r.URL.Path == "/api2.html":
 				static = api2
+			case r.URL.Path == "/modern.html":
+				static = static + " 'unsafe-inline'"
+				connect = "*"
 			case strings.HasPrefix(r.URL.Path, "/counter/"):
 				frame = allFrameAncestors
 			}
@@ -406,7 +416,7 @@ func addcsp(domainStatic string) func(http.Handler) http.Handler {
 				writeCSP(b, header.CSPImgSrc, static+" data: https://goatcounter.goatcounter.com")
 				writeCSP(b, header.CSPFrameSrc, "'self' https://goatcounter.goatcounter.com")
 			} else {
-				writeCSP(b, header.CSPConnectSrc, wss)
+				writeCSP(b, header.CSPConnectSrc, connect)
 				writeCSP(b, header.CSPImgSrc, static+" data:")
 				writeCSP(b, header.CSPFrameSrc, header.CSPSourceSelf)
 			}
