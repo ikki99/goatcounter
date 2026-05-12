@@ -18,6 +18,7 @@ import (
 	"zgo.at/goatcounter/v2/widgets"
 	"zgo.at/guru"
 	"zgo.at/z18n"
+	"zgo.at/zdb"
 	"zgo.at/zhttp"
 	"zgo.at/zstd/zint"
 	"zgo.at/zstd/zstrconv"
@@ -97,6 +98,30 @@ func (h backend) dashboard(w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return err
 	}
+
+	var trackedDomains []string
+	err = zdb.Select(r.Context(), &trackedDomains, `
+		SELECT DISTINCT
+		  CASE 
+		    WHEN instr(substr(path, 2), '/') > 0 THEN substr(substr(path, 2), 1, instr(substr(path, 2), '/') - 1)
+		    ELSE substr(path, 2)
+		  END as d
+		FROM paths
+		WHERE site_id = ? AND path LIKE '/%'
+		ORDER BY d
+	`, site.ID)
+	if err != nil {
+		log.Error(r.Context(), err)
+	}
+
+	// Filter out empty domains (e.g. from the root "/" path)
+	var validDomains []string
+	for _, d := range trackedDomains {
+		if d != "" && d != " " {
+			validDomains = append(validDomains, d)
+		}
+	}
+	trackedDomains = validDomains
 
 	cd := goatcounter.Config(r.Context()).DomainCount
 	if cd == "" {
@@ -255,9 +280,10 @@ func (h backend) dashboard(w http.ResponseWriter, r *http.Request) error {
 		Total       int
 		TotalUTC    int
 		ConnectID   zint.Uint128
+		TrackedDomains []string
 	}{newGlobals(w, r), cd, subs, showRefs, rng,
 		args.PathFilter, allowGroups, wid, view, shared.Total, shared.TotalUTC,
-		connectID})
+		connectID, trackedDomains})
 }
 
 func (h backend) loadWidget(w http.ResponseWriter, r *http.Request) error {
