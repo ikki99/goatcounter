@@ -861,7 +861,7 @@
     // to be more restrictive in burst conditions. Every request also triggers a
     // CORS preflight (the Authorization header forces it) which doubles the wire
     // load. A 500ms gap keeps wire rate ~2 req/sec including preflights.
-    const RATE_LIMIT_MS = 500;
+    const RATE_LIMIT_MS = 150;
 
     const CHART_COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)', 'var(--chart-6)'];
 
@@ -2546,34 +2546,37 @@
       // per key so a single failure never bricks the dashboard. Progress
       // counters drive the topbar "Loading X of Y…" indicator.
       const runTier = useCallback(async (keys, cancelledRef) => {
-        for (const k of keys) {
+        await Promise.all(keys.map(async (k) => {
           if (cancelledRef.current) return;
           const url = endpointFor(k);
-          if (!url) continue;
+          if (!url) return;
+
           setProgress(p => ({ ...p, fired: p.fired + 1 }));
-          let earlyReturn = false;
           try {
             const res = await client.request(url);
-            if (cancelledRef.current) { earlyReturn = true; return; }
+            if (cancelledRef.current) return;
             setData(prev => ({ ...prev, [k]: res }));
-            setErrors(prev => { if (!(k in prev)) return prev; const n = { ...prev }; delete n[k]; return n; });
+            setErrors(prev => {
+              if (!(k in prev)) return prev;
+              const n = { ...prev };
+              delete n[k];
+              return n;
+            });
           } catch (e) {
-            if (cancelledRef.current) { earlyReturn = true; return; }
-            if (e.kind === 'auth') { setAuthErr(e); earlyReturn = true; return; }
-            // campaigns is optional — older self-hosted instances may 404
+            if (cancelledRef.current) return;
+            if (e.kind === 'auth') {
+              setAuthErr(e);
+              return;
+            }
             if (k === 'campaigns' && e.kind === 'notfound') {
               setData(prev => ({ ...prev, campaigns: { stats: [] } }));
-              continue;
+              return;
             }
             setErrors(prev => ({ ...prev, [k]: e.message || 'Failed' }));
           } finally {
-            // Always pair fired++ with done++ so the progress counter never
-            // gets stuck. React 18 silently no-ops setState on unmounted
-            // components, so we don't need to guard for that.
             setProgress(p => ({ ...p, done: p.done + 1 }));
           }
-          if (earlyReturn) return;
-        }
+        }));
       }, [client, endpointFor]);
 
       // Single-key retry — fires one request through the queue with cache bypass.
@@ -2647,24 +2650,27 @@
         (async () => {
           await warmUp();
           if (cancelledRef.current) return;
-          await runTier(['total', 'hits', 'languages'], cancelledRef);
-          if (cancelledRef.current) return;
-          setLastUpdatedAt(Date.now());
-
+          
+          const mainTier = runTier(['total', 'hits', 'languages'], cancelledRef);
+          
           // Previous-period total for trend (best-effort, doesn't block UI)
-          setProgress(p => ({ ...p, fired: p.fired + 1 }));
-          try {
-            const prev = getPreviousRange(start, end);
-            const prevRes = await client.request(
-              `/api/v0/stats/total?start=${encodeURIComponent(prev.start)}&end=${encodeURIComponent(prev.end)}`
-            );
-            if (!cancelledRef.current) setPrevTotal(prevRes.total ?? prevRes.total_utc ?? null);
-          } catch (e) {
-            if (!cancelledRef.current) setPrevTotal(null);
-          } finally {
-            // Always increment done — see runTier finally for the rationale.
-            setProgress(p => ({ ...p, done: p.done + 1 }));
-          }
+          const trendTier = (async () => {
+            setProgress(p => ({ ...p, fired: p.fired + 1 }));
+            try {
+              const prev = getPreviousRange(start, end);
+              const prevRes = await client.request(
+                `/api/v0/stats/total?start=${encodeURIComponent(prev.start)}&end=${encodeURIComponent(prev.end)}`
+              );
+              if (!cancelledRef.current) setPrevTotal(prevRes.total ?? prevRes.total_utc ?? null);
+            } catch (e) {
+              if (!cancelledRef.current) setPrevTotal(null);
+            } finally {
+              setProgress(p => ({ ...p, done: p.done + 1 }));
+            }
+          })();
+
+          await Promise.all([mainTier, trendTier]);
+          if (!cancelledRef.current) setLastUpdatedAt(Date.now());
         })();
         return () => { cancelledRef.current = true; };
       }, [demoMode, client, start, end, refreshTick, runTier, warmUp]);

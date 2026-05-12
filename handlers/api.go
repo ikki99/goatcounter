@@ -476,7 +476,7 @@ type APICountRequest struct {
 
 	// Filter pageviews; accepted values:
 	//
-	//   ip     Ignore requests coming from IP addresses listed in "Settings 鈫?Ignore IP". Requires the IP field to be set.
+	//   ip     Ignore requests coming from IP addresses listed in "Settings 閳?Ignore IP". Requires the IP field to be set.
 	//
 	// ["ip"] is used if this field isn't sent; send an empty array ([]) to not
 	// filter anything.
@@ -812,8 +812,6 @@ func (h api) siteUpdate(w http.ResponseWriter, r *http.Request) error {
 
 	var args apiSiteUpdateRequest
 	if r.Method == http.MethodPatch {
-		args.LinkDomain = site.LinkDomain
-		args.Cname = site.Cname
 		args.Settings = site.Settings
 	}
 
@@ -822,8 +820,6 @@ func (h api) siteUpdate(w http.ResponseWriter, r *http.Request) error {
 		return err
 	}
 
-	site.LinkDomain = args.LinkDomain
-	site.Cname = args.Cname
 	site.Settings = args.Settings
 	err = site.Update(r.Context())
 	if err != nil {
@@ -896,7 +892,7 @@ type (
 		// monthly value, instead of hourly.
 		//
 		// The Hourly, Daily, Weekly, and Monthly values are always included in
-		// the response 鈥?this only affects the Max value, which is useful if
+		// the response 閳?this only affects the Max value, which is useful if
 		// you want to draw charts like the GoatCounter dashboard: you need to
 		// know the maximum Y-axis value of the chart to draw it.
 		//
@@ -1418,22 +1414,7 @@ func (h api) trackedDomains(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	site := goatcounter.MustGetSite(r.Context())
-
 	uniqueDomains := make(map[string]struct{})
-
-	// 1. Add domains from site config
-	if site.Cname != nil && *site.Cname != "" {
-		uniqueDomains[*site.Cname] = struct{}{}
-	}
-	if site.LinkDomain != "" {
-		d := site.LinkDomain
-		d = strings.TrimPrefix(d, "http://")
-		d = strings.TrimPrefix(d, "https://")
-		d = strings.Split(d, "/")[0]
-		if d != "" && strings.Contains(d, ".") {
-			uniqueDomains[d] = struct{}{}
-		}
-	}
 
 	// 2. Add domains from paths
 	var paths []string
@@ -1456,7 +1437,6 @@ func (h api) trackedDomains(w http.ResponseWriter, r *http.Request) error {
 						}
 					}
 					if !isExt {
-						uniqueDomains[d] = struct{}{}
 					}
 				}
 			}
