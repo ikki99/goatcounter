@@ -6,11 +6,10 @@ import (
 	"context"
 	"embed"
 	"fmt"
-	"math"
 	"strconv"
 
 	"github.com/google/uuid"
-	"github.com/mattn/go-sqlite3"
+	_ "modernc.org/sqlite"
 	"zgo.at/z18n"
 	"zgo.at/zdb"
 	"zgo.at/zstd/zcrypto"
@@ -46,13 +45,8 @@ const (
 
 var States = []string{StateActive, StateRequest, StateDeleted}
 
-var SQLiteHook = func(c *sqlite3.SQLiteConn) error {
-	return c.RegisterFunc("percent_diff", func(start, final int) float64 {
-		if start == 0 {
-			return math.Inf(0)
-		}
-		return (float64(final - start)) / float64(start) * 100.0
-	}, true)
+var SQLiteHook = func(c any) error {
+	return nil // CGO hooks disabled for pure-Go build
 }
 
 // TODO: Move to zdb

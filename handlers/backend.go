@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -48,6 +49,14 @@ func (h backend) Mount(r chi.Router, db zdb.DB, dev, saas bool, domainStatic str
 		r.Use(mware.Delay(0))
 	}
 
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/count" || r.URL.Path == "/count.js" {
+				fmt.Printf("[DEBUG_REQ] %s %s | IP: %s | Host: %s\n", r.Method, r.URL.Path, r.RemoteAddr, r.Host)
+			}
+			next.ServeHTTP(w, r)
+		})
+	})
 	r.Use(
 		mware.RealIP(),
 		mware.WrapWriter(),

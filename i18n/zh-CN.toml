@@ -31,6 +31,7 @@
   default = "确定，删除每项"
 
 ["button/delete-pageviews"]
+  default = "删除页面浏览记录"
 
 ["button/disable-mfa"]
   default = "关闭多重身份验证"
@@ -45,6 +46,7 @@
   default = "忘记了密码？"
 
 ["button/merge"]
+  default = "合并"
 
 ["button/remove"]
   default = "删除"
@@ -68,11 +70,13 @@
   default = "保存默认视图"
 
 ["button/search"]
+  default = "搜索"
 
 ["button/send-login-url"]
   default = "发送登录 URL"
 
 ["button/show"]
+  default = "显示"
 
 ["button/sign-in"]
   default = "登录"
@@ -87,6 +91,7 @@
   default = "提交"
 
 ["button/upload-ga-import"]
+  default = "上传 GA 导出数据"
 
 ["confirm/delete-user"]
   default = "删除 %(email)？"
@@ -100,6 +105,7 @@
   many    = "许多天前"
 
 ["dashboard/loading"]
+  default = "正在加载..."
 
 ["dashboard/month-ago"]
   default = "%(n) 个月前"
@@ -113,6 +119,7 @@
   default = "没有数据可展示"
 
 ["dashboard/pages/change"]
+  default = "变化"
 
 ["dashboard/pages/header"]
   default = "路径总览"
@@ -156,6 +163,7 @@
   default = "国家名称，例如 Belgium、Indonesia。"
 
 ["data-collect/help/hits"]
+  default = "记录所有的页面浏览和事件。"
 
 ["data-collect/help/language"]
   default = "accept-language 标识的受支持的语言。"
@@ -173,11 +181,13 @@
   default = "屏幕大小。"
 
 ["data-collect/help/user-agent"]
+  default = "收集用户代理信息用于统计浏览器和操作系统。"
 
 ["data-collect/label/country"]
   default = "国家"
 
 ["data-collect/label/hits"]
+  default = "点击量"
 
 ["data-collect/label/language"]
   default = "语言"
@@ -207,16 +217,22 @@
   default = "上个月"
 
 ["dont-lock"]
+  default = "不锁定"
 
 ["email-report/daily"]
+  default = "每天"
 
 ["email-report/monthly"]
+  default = "每月"
 
 ["email-report/never"]
+  default = "从不"
 
 ["email-report/two-weeks"]
+  default = "每两周"
 
 ["email-report/weekly"]
+  default = "每周"
 
 ["email/header"]
   default = "你好，"
@@ -256,6 +272,7 @@ Martin
   default = "那将回到站点开始记录之前；GoatCounter 还没那么厉害。;-)"
 
 ["error/email-exists"]
+  default = "该邮箱已存在。"
 
 ["error/export-expired"]
   default = "暂无导出或导出已过期。"
@@ -288,6 +305,7 @@ Martin
   default = "%(email) 的密码错误"
 
 ["error/merge-self"]
+  default = "不能将账号合并到它自己。"
 
 ["error/not-found"]
   default = "未找到"
@@ -299,6 +317,7 @@ Martin
   default = "不存在账号 %(email)"
 
 ["error/unknown-activation-token"]
+  default = "无效的激活令牌或令牌已过期。"
 
 ["event"]
   default = "事件"
@@ -310,6 +329,7 @@ Martin
   default = "权限"
 
 ["header/add-api-token"]
+  default = "添加 API 令牌"
 
 ["header/add-new-user"]
   default = "新建用户"
@@ -366,8 +386,10 @@ Martin
   default = "导出/导入"
 
 ["header/export-to-csv"]
+  default = "导出为 CSV"
 
 ["header/fewer-number"]
+  default = "数字缩写"
 
 ["header/finished"]
   default = "完成于"
@@ -382,8 +404,10 @@ Martin
   default = "哈希"
 
 ["header/import-from-csv"]
+  default = "从 CSV 导入"
 
 ["header/import-from-ga"]
+  default = "从 Google Analytics 导入"
 
 ["header/l10n"]
   default = "本地化"
@@ -395,6 +419,7 @@ Martin
   default = "最后的 10 个导出"
 
 ["header/last-used-at"]
+  default = "最后使用时间"
 
 ["header/locations"]
   default = "位置统计"
@@ -403,8 +428,10 @@ Martin
   default = "%(country) 的位置"
 
 ["header/manage-pageviews"]
+  default = "管理页面浏览记录"
 
 ["header/merge-account"]
+  default = "合并账号"
 
 ["header/mfa"]
   default = "多重身份认证"
@@ -482,6 +509,7 @@ Martin
   default = "用户"
 
 ["help/allow-embed"]
+  default = "允许在哪些外部网站通过 iframe 嵌入仪表盘。"
 
 ["help/allow-visitor-counts"]
   default = "查看%[文档]了解如何使用。"
@@ -493,6 +521,7 @@ Martin
   default = "你可以在 https://<em>[代码]</em>.%(domain) 访问站点。"
 
 ["help/configure-dashboard"]
+  default = "你可以自定义在仪表盘中要显示的部件以及它们的顺序。"
 
 ["help/custom-domain"]
   default = """
@@ -516,6 +545,7 @@ Martin
   default = "页面浏览记录及所有关联数据都将在这些天后永久删除。设为 <code>0</code> 则永不删除。"
 
 ["help/datepicker"]
+  default = "使用日期选择器来选择统计时间范围。"
 
 ["help/domain-access"]
   default = "用以访问该站点的域名。"
@@ -524,10 +554,13 @@ Martin
   default = "拖拽排序"
 
 ["help/email-reports"]
+  default = "设置定期向你的邮箱发送流量统计报告。"
 
 ["help/fewer-numbers"]
+  default = "启用后大数字将使用缩写（如：将 10,000 显示为 10k）。"
 
 ["help/fewer-numbers-lock"]
+  default = "为所有用户锁定大数字缩写设置。"
 
 ["help/for-the-following-countries"]
   default = "国家代码列表（%[列表]；使用 2 字母代码）；留空则从所有国家收集数据（如果启用了国家数据收集）。"
@@ -542,8 +575,10 @@ Martin
   default = "或者，%[为此浏览器关闭跟踪]（再次点击以启用）。"
 
 ["help/locked-until"]
+  default = "账号或功能被锁定直至该时间。"
 
 ["help/need-cities"]
+  default = "需要额外配置以收集城市级别的地理位置信息。"
 
 ["help/new-user-email"]
   default = "登录用邮箱。"
@@ -576,6 +611,7 @@ Martin
   default = "24 小时时钟（13:00）"
 
 ["label/access-to-sites"]
+  default = "有权访问的站点"
 
 ["label/add-new"]
   default = "新建"
@@ -590,6 +626,7 @@ Martin
   default = "浏览器统计"
 
 ["label/campaigns"]
+  default = "营销活动"
 
 ["label/change-code"]
   default = "你的账号绑定在 https://<em>[代码]</em>.%(domain)——%[%link 更改]。"
@@ -610,6 +647,7 @@ Martin
   default = "当前域名"
 
 ["label/dashboard-allow-embed"]
+  default = "允许被嵌入的网站列表"
 
 ["label/dashboard-public"]
   default = "仪表盘查看权限"
@@ -621,6 +659,7 @@ Martin
   default = "日期格式"
 
 ["label/datepicker"]
+  default = "日期选择"
 
 ["label/delete-account-confirmation"]
   default = "你确定要删除整个账号吗？"
@@ -632,8 +671,10 @@ Martin
   default = "邮箱地址"
 
 ["label/email-reports"]
+  default = "定期邮件报告"
 
 ["label/fewer-numbers"]
+  default = "缩写大数字"
 
 ["label/for-following-countries"]
   default = "只针对下列国家："
@@ -654,18 +695,22 @@ Martin
   default = "位置统计"
 
 ["label/lock-setting"]
+  default = "锁定此设置"
 
 ["label/mark-current"]
   default = "（当前）"
 
 ["label/match-case"]
+  default = "区分大小写"
 
 ["label/match-title"]
   default = "也匹配标题"
 
 ["label/merge-account-confirmation"]
+  default = "确认合并账号信息"
 
 ["label/merge-to"]
+  default = "合并至"
 
 ["label/mfa-token"]
   default = "多重身份验证令牌"
@@ -728,6 +773,7 @@ Martin
   default = "系统统计"
 
 ["label/theme"]
+  default = "显示主题"
 
 ["label/thousand-separator"]
   default = "千位分隔符"
@@ -775,10 +821,13 @@ Martin
   default = "前往 %(path)"
 
 ["link/import"]
+  default = "导入数据"
 
 ["link/manage-pageviews"]
+  default = "管理页面记录"
 
 ["link/merge-account"]
+  default = "合并账号"
 
 ["link/passwd-mfa"]
   default = "密码与多重身份验证"
@@ -796,6 +845,7 @@ Martin
   default = "设置"
 
 ["link/show-less"]
+  default = "收起"
 
 ["link/show-more"]
   default = "显示更多"
@@ -834,6 +884,7 @@ Martin
   default = "筛选路径"
 
 ["nav-dash/filter-more-help"]
+  default = "查看更多筛选帮助"
 
 ["nav-dash/filter-tooltip"]
   default = """
@@ -857,6 +908,7 @@ Martin
   default = "半年"
 
 ["nav-dash/hour"]
+  default = "小时"
 
 ["nav-dash/last"]
   default = "前一"
@@ -871,6 +923,7 @@ Martin
   default = "日期显示范围的起始"
 
 ["nav-dash/view-by"]
+  default = "查看跨度："
 
 ["nav-dash/week"]
   default = "周"
@@ -879,8 +932,10 @@ Martin
   default = "年"
 
 ["nav-fash/filter-less-help"]
+  default = "收起帮助"
 
 ["new-paren"]
+  default = " (新)"
 
 ["no-title"]
   default = "无标题"
@@ -904,6 +959,7 @@ Martin
   default = "导出已在后台开始；完成时将通过邮件发送下载链接。"
 
 ["notify/import-ga-okay"]
+  default = "Google Analytics 数据导入完成。"
 
 ["notify/import-started-in-background"]
   default = "导入已在后台开始；完成时将通过邮件通知。"
@@ -970,11 +1026,13 @@ Martin
 """
 
 ["p/add-multiple-accounts"]
+  default = "你可以在这里添加多个 GoatCounter 账号。"
 
 ["p/additional-errors"]
   default = "额外错误。"
 
 ["p/all-sites"]
+  default = "此操作将应用到你管理的所有站点。"
 
 ["p/api-intro"]
   default = "GoatCounter 的 API 功能有限；目前可以计算页面浏览、创建、删除和编辑站点，以及导出数据。"
@@ -1001,6 +1059,7 @@ Martin
   default = "CSV 文件的格式%[见此]。"
 
 ["p/delete-account"]
+  default = "警告：这会永久删除你的账号及所有相关数据。"
 
 ["p/disable-mfa"]
   default = "此账号当前已启用多重身份验证。"
@@ -1012,6 +1071,7 @@ Martin
   default = "错误：%(error-message)"
 
 ["p/export-csv"]
+  default = "将收集到的所有流量数据导出为 CSV 格式文件以便下载分析。"
 
 ["p/export-process"]
   default = "将在完成后通过邮件发送下载链接。你每小时只能导出 1 次，并且将覆盖之前的副本。"
@@ -1020,13 +1080,16 @@ Martin
   default = "此账号受多重身份验证保护；请输入验证器应用程序中的代码。"
 
 ["p/import-ga"]
+  default = "支持导入 Google Analytics (GA4) 的历史数据包。"
 
 ["p/last-user"]
   default = "无法删除或编辑最后一位管理员用户"
 
 ["p/manage-hits"]
+  default = "在这里你可以删除特定路径的点击数据，此操作不可逆。"
 
 ["p/merge-account"]
+  default = "将当前账号的所有站点和数据无缝迁移到另一个账号中。"
 
 ["p/no-data"]
   default = """
@@ -1052,6 +1115,7 @@ Martin
   default = "将删除 %(number) 个站点"
 
 ["p/num-accounts"]
+  default = "管理账号数量限制"
 
 ["p/remove-site-confirm"]
   default = "你确定要删除站点 %(sitename)？<br>这将<strong>删除所有关联数据</strong>。"
@@ -1063,6 +1127,7 @@ Martin
   default = "你确定要删除站点 %(sitename)？<br>这将<strong>删除所有关联数据</strong>，并且它是<strong>当前站点</strong>。"
 
 ["p/rm-hits-help"]
+  default = "输入你要删除的路径，系统将移除匹配的记录。"
 
 ["p/rm-pageview-match"]
   default = "以下路径匹配 %(query)："
@@ -1089,12 +1154,16 @@ Martin
   default = "缩放 Y 轴至最大"
 
 ["theme/dark"]
+  default = "深色"
 
 ["theme/light"]
+  default = "浅色"
 
 ["theme/system"]
+  default = "跟随系统"
 
 ["tooltip/change-period"]
+  default = "更改数据统计的周期"
 
 ["top-nav/back"]
   default = "返回"
@@ -1103,6 +1172,7 @@ Martin
   default = "仪表盘"
 
 ["top-nav/documentation"]
+  default = "文档"
 
 ["top-nav/need-js"]
   default = "GoatCounter 需要启用 JavaScript 以发挥效用；请允许 JavaScript 在 %(domain) 运行。"
@@ -1171,6 +1241,7 @@ Martin
   default = "必须比 %d 个字符少"
 
 ["validate/need-one"]
+  default = "必须至少提供一个有效值"
 
 ["validate/phone"]
   default = "必须是有效的电话号码"
@@ -1191,6 +1262,7 @@ Martin
   default = "必须是 UTF-8"
 
 ["view not set"]
+  default = "未设置视图"
 
 ["widget-setting/help/align"]
   default = "在左侧添加外边距，使其与路径图表对齐"

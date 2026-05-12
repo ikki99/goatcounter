@@ -34,6 +34,8 @@ func (h backend) count(w http.ResponseWriter, r *http.Request) error {
 	// https://github.com/golang/go/issues/16100
 	w.Header().Set("Connection", "close")
 
+	fmt.Printf("[HIT_ATTEMPT] Path: %s | IP: %s | UA: %s\n", r.URL.Query().Get("p"), r.RemoteAddr, r.UserAgent())
+
 	bot := isbot.Bot(r)
 	// Don't track pages fetched with the browser's prefetch algorithm.
 	if bot == isbot.BotPrefetch {
@@ -98,11 +100,13 @@ func (h backend) count(w http.ResponseWriter, r *http.Request) error {
 
 	err = hit.Validate(r.Context(), true)
 	if err != nil {
+		fmt.Printf("[HIT_REJECTED] Error: %s\n", err)
 		w.Header().Add("X-Goatcounter", fmt.Sprintf("not valid: %s", err))
 		w.WriteHeader(400)
 		return zhttp.Bytes(w, gif)
 	}
 
+	fmt.Printf("[HIT_ACCEPTED] Path: %s | Bot: %d\n", hit.Path, hit.Bot)
 	goatcounter.Memstore.Append(hit)
 	return zhttp.Bytes(w, gif)
 }

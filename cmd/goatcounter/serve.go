@@ -285,6 +285,18 @@ func cmdServe(f zli.Flags, ready chan<- struct{}, stop chan struct{}, saas bool)
 	if port.Int() > 0 {
 		c.Port = fmt.Sprintf(":%d", port.Int())
 	}
+	// Beginner-friendly override from config.json
+	if cfg, _ := LoadConfig(); cfg != nil {
+		if cfg.PublicPort == "" {
+			c.Port = ""
+		} else {
+			if !strings.HasPrefix(cfg.PublicPort, ":") {
+				c.Port = ":" + cfg.PublicPort
+			} else {
+				c.Port = cfg.PublicPort
+			}
+		}
+	}
 
 	timeout := 60
 	if saas {

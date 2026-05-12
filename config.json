@@ -1,0 +1,9 @@
+{
+  "listen": ":6090",
+  "email": "wngx99@gmail.com",
+  "password": "your_password_here",
+  "ip_address": "10wj.f89f.top",
+  "public_port": "",
+  "smtp": "stdout",
+  "store_every": 10
+}

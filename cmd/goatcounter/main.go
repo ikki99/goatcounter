@@ -20,7 +20,6 @@ import (
 	"zgo.at/json"
 	"zgo.at/slog_align"
 	"zgo.at/zdb"
-	"zgo.at/zdb-drivers/go-sqlite3"
 	_ "zgo.at/zdb-drivers/pq"
 	"zgo.at/zdb/drivers"
 	"zgo.at/zli"
@@ -59,9 +58,26 @@ func cmdMain(f zli.Flags, ready chan<- struct{}, stop chan struct{}) {
 	mainDone.Add(1)
 	defer mainDone.Done()
 
-	cmd, err := f.ShiftCommand("help", "version", "serve", "import",
+	cmd, err := f.ShiftCommand("serve", "help", "version", "import",
 		"dashboard", "db", "monitor",
 		"saas", "goat")
+
+	cfg, _ := LoadConfig()
+	if cfg != nil && (cmd == "" || cmd == "serve") {
+		if cfg.Listen != "" {
+			f.Args = append(f.Args, "-listen", cfg.Listen)
+		}
+		if cfg.PublicPort != "" {
+			f.Args = append(f.Args, "-port", cfg.PublicPort)
+		}
+		if cfg.Smtp != "" {
+			f.Args = append(f.Args, "-smtp", cfg.Smtp)
+		}
+		if cfg.StoreEvery > 0 {
+			f.Args = append(f.Args, "-store-every", strconv.Itoa(cfg.StoreEvery))
+		}
+	}
+
 	if zslice.ContainsAny(f.Args, "-h", "-help", "--help") {
 		f.Args = append([]string{cmd}, f.Args...)
 		cmd = "help"
@@ -79,7 +95,7 @@ func cmdMain(f zli.Flags, ready chan<- struct{}, stop chan struct{}) {
 		zli.Errorf(usage[""])
 		zli.Errorf("unknown command: %q", cmd)
 		zli.Exit(1)
-	case "", "help":
+	case "help":
 		run = cmdHelp
 	case "version":
 		var (
@@ -115,7 +131,7 @@ func cmdMain(f zli.Flags, ready chan<- struct{}, stop chan struct{}) {
 
 	case "db", "database":
 		run = cmdDB
-	case "serve":
+	case "", "serve":
 		run = func(f zli.Flags, ready chan<- struct{}, stop chan struct{}) error {
 			return cmdServe(f, ready, stop, false)
 		}
@@ -224,7 +240,7 @@ func connectDB(connect, dbConn string, migrate []string, create, dev bool) (zdb.
 		return nil, nil, err
 	}
 
-	sqlite3.DefaultHook(goatcounter.SQLiteHook)
+	// sqlite3.DefaultHook(goatcounter.SQLiteHook)
 
 	db, err := zdb.Connect(context.Background(), zdb.ConnectOptions{
 		Connect:      connect,
@@ -245,14 +261,19 @@ func connectDB(connect, dbConn string, migrate []string, create, dev bool) (zdb.
 	// TODO: maybe ask for confirmation here?
 	var cErr *drivers.NotExistError
 	if errors.As(err, &cErr) {
-		if cErr.DB == "" {
-			err = fmt.Errorf("%s database at %q exists but is empty.\n"+
-				"Add the -createdb flag to create this database if you're sure this is the right location",
-				cErr.Driver, connect)
+		cfg, _ := LoadConfig()
+		if cfg != nil && cfg.Email != "" && cfg.Password != "" {
+			// This will be handled by the proactive check later
 		} else {
-			err = fmt.Errorf("%s database at %q doesn't exist.\n"+
-				"Add the -createdb flag to create this database if you're sure this is the right location",
-				cErr.Driver, cErr.DB)
+			if cErr.DB == "" {
+				err = fmt.Errorf("%s database at %q exists but is empty.\n"+
+					"Add the -createdb flag to create this database if you're sure this is the right location",
+					cErr.Driver, connect)
+			} else {
+				err = fmt.Errorf("%s database at %q doesn't exist.\n"+
+					"Add the -createdb flag to create this database if you're sure this is the right location",
+					cErr.Driver, cErr.DB)
+			}
 		}
 	}
 	if err != nil {
@@ -285,6 +306,21 @@ func connectDB(connect, dbConn string, migrate []string, create, dev bool) (zdb.
 	} else if log.HasDebug("sql-result") {
 		db = zdb.NewLogDB(db, os.Stderr, zdb.DumpQuery|zdb.DumpLocation|zdb.DumpResult, "")
 	}
+
+	// Auto-init if no sites exist
+	var count int
+	err = db.Get(context.Background(), &count, "select count(*) from sites where state != 'deleted'")
+	if err == nil && count == 0 {
+		cfg, _ := LoadConfig()
+		if cfg != nil && cfg.Email != "" && cfg.Password != "" {
+			log.Infof(context.Background(), "No sites found in database, automatically creating one for %s...", cfg.IPAddress)
+			err = AutoCreateSite(context.Background(), db, cfg)
+			if err != nil {
+				log.Errorf(context.Background(), "Auto-creation failed: %s", err)
+			}
+		}
+	}
+
 	return db, goatcounter.NewContext(context.Background(), db), nil
 }
 
