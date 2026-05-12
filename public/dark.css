@@ -1,85 +1,110 @@
 :root {
-    --text:              #fff;
-    --bg:                #000;
-    --header-border:     #888;                             /* Border below some headers */
-    --backdrop:          #0e1011;
-    --target-bg:         #b78c1d;                          /* :target; mostly for headers in the documentation. */
-    --loading-text:      #777;                             /* Little … that appears if something takes more than ~300ms to load */
+    /* Base Colors from abhishekhsingh/goatcounter-dashboard Dark Theme */
+    --text:              #e2e8f0;
+    --text-muted:        #64748b;
+    --bg:                #0f172a;
+    --bg-surface:        #1e293b;
+    --bg-surface-2:      #334155;
+    --border:            #475569;
+    
+    --header-border:     #475569;
+    --backdrop:          #0f172a;
+    --target-bg:         #334155;
+    --loading-text:      #64748b;
 
-    --link:              #8edff8;                          /* <a> */
-    --link-hover:        #7acee9;
+    /* Accent & Links */
+    --accent:            #14b8a6;
+    --accent-hover:      #2dd4bf;
+    --accent-dim:        rgba(20, 184, 166, 0.15);
+    --link:              #14b8a6;
+    --link-hover:        #2dd4bf;
 
-    --input-text:        #fff;                             /* <input>, <select> */
-    --input-bg:          #000;
-    --input-border:      #444;
-    --input-focus:       #8edff8;                          /* Outline for focused inputs etc. */
-    --fieldset-border:   #666;                             /* Border around setting boxes on the settings page */
-    --form-error-text:   #ff8f8f;
-    --input-error-border: red;
+    /* Inputs */
+    --input-text:        #e2e8f0;
+    --input-bg:          #1e293b;
+    --input-border:      #475569;
+    --input-focus:       #14b8a6;
+    --input-focus-dim:   rgba(20, 184, 166, 0.2);
+    --fieldset-border:   #475569;
+    --form-error-text:   #ef4444;
+    --input-error-border:#ef4444;
 
-    --btn-text:          #fff;                             /* <button> */
-    --btn-bg:            linear-gradient(#7e7d7d, #404040);
-    --btn-border:        #b0b0b0;                          /* Default border style */
-    --btn-border-outset: #b8b8b8;                          /* Top and left styles for "3D" effect */
-    --btn-hover-bg:      linear-gradient(#656565, #2d2d2d);
-    --btn-active-bg:     linear-gradient(#2d2d2d, #656565);
+    /* Buttons */
+    --btn-text:          #e2e8f0;
+    --btn-bg:            #1e293b;
+    --btn-border:        #475569;
+    --btn-border-outset: transparent;
+    --btn-hover-bg:      #334155;
+    --btn-active-bg:     #475569;
 
-    --code-text:         #fff;                             /* <code>, <pre>, etc. */
-    --code-bg:           #000;
-    --code-border:       #d5d5d5;                          /* <pre> only */
+    /* Code */
+    --code-text:         #e2e8f0;
+    --code-bg:           #334155;
+    --code-border:       #475569;
 
-    --tooltip-text:      #fff;                             /* Tooltips in the charts, some help text, "configure" button */
-    --tooltip-bg:        #060606;
-    --tooltip-border:    #ddd;
-    --tooltip-shadow:    #aaa;
+    /* Tooltips */
+    --tooltip-text:      #e2e8f0;
+    --tooltip-bg:        #1e293b;
+    --tooltip-border:    #475569;
+    --tooltip-shadow:    0 8px 30px rgba(0,0,0,0.4);
 
-    --chart-line:        #003996;                          /* Charts on the dashboard */
-    --chart-fill:        #003996;
-    --chart-grid:        #555;
-    --hchart-border:     #666;                             /* Colour when you hover the Browsers, Systems, etc. chart bar */
-    --hchart-bar:        #1e2123;
-    --hchart-bar-hover:  #0549b6;
+    /* Charts */
+    --chart-line:        #14b8a6;
+    --chart-fill:        rgba(20, 184, 166, 0.15);
+    --chart-grid:        #334155;
+    --hchart-border:     #14b8a6;
+    --hchart-bar:        #6366f1;
+    --hchart-bar-hover:  #818cf8;
 
-    --nav-bg:            #1b093c;                          /* Navigation at dashboard, settings, and footer */
-    --nav-border:        #3f1887;
-    --footer-shadow:     #09042e;
-    --filter-kw-text:    #ffff60;                          /* Keyword in filter input (at:start, etc.) */
+    /* Navigation */
+    --nav-bg:            #1e293b;
+    --nav-border:        #475569;
+    --footer-shadow:     rgba(0,0,0,0.4);
+    --filter-kw-text:    #2dd4bf;
 
-    --info-bg:           #226883;                          /* Flash messages */
-    --info-border:       #242683;
-    --error-bg:          #790707;
-    --error-border:      #b10606;
+    /* Status Messages */
+    --info-bg:           #1e3a8a;
+    --info-border:       #3b82f6;
+    --error-bg:          #7f1d1d;
+    --error-border:      #ef4444;
 
-    --event-bg:          #393774;                          /* "Event" label in paths overview */
-    --pageviews-text:    #7a7a7a;                          /* Grey out "pageviews" in tooltip. */
+    /* Dashboard labels */
+    --event-bg:          #422006;
+    --pageviews-text:    #94a3b8;
 
-    --datapicker-border:             #626262;              /* Datepicker on dashboard (non-mobile only). */
-    --datepicker-shadow:             rgba(0,0,0,.5);
-    --datepicker-dayname-text:       #999;
-    --datepicker-day-text:           #ddd;
-    --datepicker-day-bg:             #666;
-    --datepicker-day-hover-bg:       #ff8000;
-    --datepicker-today-text:         #33aaff;
-    --datepicker-selected-shadow:    #178fe5;
-    --datepicker-selected-text:      #33aaff;
-    --datepicker-future-text:        #999;
-    --datepicker-future-bg:          #d5e9f7;
-    --datepicker-outside-month-text: #fff;
+    /* Datepicker */
+    --datepicker-border:             #475569;
+    --datepicker-shadow:             0 8px 30px rgba(0,0,0,0.4);
+    --datepicker-dayname-text:       #64748b;
+    --datepicker-day-text:           #94a3b8;
+    --datepicker-day-bg:             #1e293b;
+    --datepicker-day-hover-bg:       #334155;
+    --datepicker-today-text:         #14b8a6;
+    --datepicker-selected-shadow:    #14b8a6;
+    --datepicker-selected-text:      #ffffff;
+    --datepicker-future-text:        #475569;
+    --datepicker-future-bg:          #0f172a;
+    --datepicker-outside-month-text: #475569;
 
-    --text-table-even-bg:      #000;                       /* Styles for pages overview with the chart style set to "text" */
-    --text-table-border:       #5e5e5e;
-    --text-table-rank-text:    #a5a5a5;
+    /* Tables */
+    --text-table-even-bg:      #0f172a;
+    --text-table-border:       #475569;
+    --text-table-rank-text:    #64748b;
 
-    --widget-border:           #a4a4a4;                    /* "Widget settings" page */
-    --widget-dragging-border:  yellow;
-    --widget-dragging-bg:      #000;
-    --widget-handle-bg:        #808080;
-    --widget-handle-text:      #bcbcbc;
-    --widget-handle-hover-bg:  #898989;
+    /* Widgets */
+    --widget-border:           #475569;
+    --widget-dragging-border:  #14b8a6;
+    --widget-dragging-bg:      #134e4a;
+    --widget-handle-bg:        #334155;
+    --widget-handle-text:      #94a3b8;
+    --widget-handle-hover-bg:  #475569;
 
-    --box-bg:                  #666;                       /* Signup box on the homepage, footer */
-    --box-shadow:              #cdc8a4;                    /* box-shadow on most boxes on the homepage, /help page navigation, etc. */
+    /* Misc */
+    --box-bg:                  #1e293b;
+    --box-shadow:              0 1px 2px rgba(0,0,0,0.3), 0 4px 12px rgba(0,0,0,0.2);
 
-    --plus:                    #008837;                    /* Positive numbers (+5%) */
-    --minus:                   #ac3ad3;                    /* Negative numbers (-5%) */
+    --plus:                    #22c55e;
+    --minus:                   #ef4444;
 }
+
+img, canvas, iframe, video, svg, select { filter: invert(0); }
