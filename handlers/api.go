@@ -1416,42 +1416,65 @@ func (h api) trackedDomains(w http.ResponseWriter, r *http.Request) error {
 	site := goatcounter.MustGetSite(r.Context())
 	uniqueDomains := make(map[string]struct{})
 
-	// 1. Add domains from paths (actual tracked data)
+	// 1. Add domains from paths that have actual traffic
 	var paths []string
-	err := zdb.Select(r.Context(), &paths, `SELECT path FROM paths WHERE site_id = ?`, site.ID)
+	err = zdb.Select(r.Context(), &paths, `
+		SELECT DISTINCT paths.path 
+		FROM paths 
+		JOIN hit_counts USING (path_id) 
+		WHERE hit_counts.site_id = ?`, site.ID)
 	if err == nil {
 		extensions := []string{".html", ".php", ".asp", ".aspx", ".jsp", ".htm", ".js", ".css", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico"}
 		for _, p := range paths {
-			if !strings.HasPrefix(p, "/") {
+			p = strings.TrimLeft(p, "/")
+			if p == "" {
 				continue
 			}
-			parts := strings.Split(strings.TrimPrefix(p, "/"), "/")
-			if len(parts) > 0 {
-				d := parts[0]
-				if strings.Contains(d, ".") {
-					isExt := false
-					for _, ext := range extensions {
-						if strings.HasSuffix(strings.ToLower(d), ext) {
-							isExt = true
-							break
-						}
+
+			// Extract the first component of the path.
+			d := p
+			if i := strings.Index(p, "/"); i > -1 {
+				d = p[:i]
+			}
+
+			if strings.Contains(d, ".") {
+				// Filter out common file extensions to ensure we only get domains.
+				isExt := false
+				for _, ext := range extensions {
+					if strings.HasSuffix(strings.ToLower(d), ext) {
+						isExt = true
+						break
 					}
-					if !isExt {
-						uniqueDomains[d] = struct{}{}
-					}
+				}
+				if !isExt {
+					uniqueDomains[d] = struct{}{}
 				}
 			}
 		}
 	}
 
 	var valid []string
+	mainDomain := ""
+	if site.Cname != nil {
+		mainDomain = *site.Cname
+	} else {
+		mainDomain = site.Code + "." + goatcounter.Config(r.Context()).Domain
+	}
+
 	for d := range uniqueDomains {
 		// Exclude primary domain to avoid redundancy with "All"
-		if site.Cname != nil && d == *site.Cname {
+		if d == mainDomain {
 			continue
 		}
-		if site.LinkDomain != "" && (d == site.LinkDomain || strings.HasPrefix(site.LinkDomain, d)) {
-			continue
+		// Also check against LinkDomain if set
+		if site.LinkDomain != "" {
+			ld := site.LinkDomain
+			ld = strings.TrimPrefix(ld, "http://")
+			ld = strings.TrimPrefix(ld, "https://")
+			ld = strings.Split(ld, "/")[0]
+			if d == ld {
+				continue
+			}
 		}
 		valid = append(valid, d)
 	}
