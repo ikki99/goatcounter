@@ -1416,23 +1416,9 @@ func (h api) trackedDomains(w http.ResponseWriter, r *http.Request) error {
 	site := goatcounter.MustGetSite(r.Context())
 	uniqueDomains := make(map[string]struct{})
 
-	// 1. Add domains from site config
-	if site.Cname != nil && *site.Cname != "" {
-		uniqueDomains[*site.Cname] = struct{}{}
-	}
-	if site.LinkDomain != "" {
-		d := site.LinkDomain
-		d = strings.TrimPrefix(d, "http://")
-		d = strings.TrimPrefix(d, "https://")
-		d = strings.Split(d, "/")[0]
-		if d != "" && strings.Contains(d, ".") {
-			uniqueDomains[d] = struct{}{}
-		}
-	}
-
-	// 2. Add domains from paths
+	// 1. Add domains from paths (actual tracked data)
 	var paths []string
-	err = zdb.Select(r.Context(), &paths, `SELECT path FROM paths WHERE site_id = ?`, site.ID)
+	err := zdb.Select(r.Context(), &paths, `SELECT path FROM paths WHERE site_id = ?`, site.ID)
 	if err == nil {
 		extensions := []string{".html", ".php", ".asp", ".aspx", ".jsp", ".htm", ".js", ".css", ".png", ".jpg", ".jpeg", ".gif", ".svg", ".ico"}
 		for _, p := range paths {
@@ -1460,6 +1446,13 @@ func (h api) trackedDomains(w http.ResponseWriter, r *http.Request) error {
 
 	var valid []string
 	for d := range uniqueDomains {
+		// Exclude primary domain to avoid redundancy with "All"
+		if site.Cname != nil && d == *site.Cname {
+			continue
+		}
+		if site.LinkDomain != "" && (d == site.LinkDomain || strings.HasPrefix(site.LinkDomain, d)) {
+			continue
+		}
 		valid = append(valid, d)
 	}
 	slices.Sort(valid)
