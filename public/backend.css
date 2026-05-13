@@ -198,16 +198,32 @@ tr.target small.go                { display: inline-block; }
 
 /* HIDE graphs and referrers by default */
 .chart, .hchart.refs { 
-    display: none; 
-    margin-top: 12px;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    margin-top: 0;
     padding-left: 80px;
+    visibility: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease, margin-top 0.3s ease;
 }
 
 /* SHOW when row is active (targeted) */
-.count-list tr.target .chart,
+.count-list tr.target .chart {
+    max-height: 60px; /* Enough for 50px chart + margins */
+    opacity: 1;
+    margin-top: 12px;
+    visibility: visible;
+}
+
 .count-list tr.target .hchart.refs {
-    display: block !important;
-    animation: slideDown 0.2s ease-out;
+    max-height: 2000px; /* Arbitrary large value */
+    opacity: 1;
+    margin-top: 12px;
+    visibility: visible;
+}
+
+.chart canvas {
+    background: transparent !important;
 }
 
 @keyframes slideDown {
