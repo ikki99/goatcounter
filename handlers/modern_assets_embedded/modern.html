@@ -913,7 +913,7 @@
   <script src="modern-assets/assets/world-map.js"></script>
 
   <script type="text/babel" data-presets="react">
-    const { useState, useEffect, useMemo, useRef, useCallback } = React;
+    const { useState, useEffect, useMemo, useRef, useCallback, memo } = React;
     const {
       ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
       PieChart, Pie, Cell, Sector,
@@ -3245,6 +3245,7 @@
             {' · '}
             Powered by <a href="https://goatcounter.com" target="_blank" rel="noopener noreferrer">GoatCounter</a> API
           </footer>
+          <CampaignGenerator isOpen={showGenerator} onClose={() => setShowGenerator(false)} />
         </div>
         </>
       );
