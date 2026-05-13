@@ -197,8 +197,8 @@ tr.target small.go                { display: inline-block; }
 /* Border doesn't affect layout. */
 .count-list:not(.count-list-text) .load-refs { border-bottom: 2px solid transparent; margin-bottom: -2px; }
 
-/* HIDE graphs and referrers by default */
-.chart, .hchart.refs { 
+/* HIDE graphs and referrers by default (only for pages list) */
+.pages-list .chart, .hchart.refs { 
     max-height: 0;
     opacity: 0;
     overflow: hidden;
