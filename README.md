@@ -13,7 +13,7 @@ Please consider [contributing financially][sponsor].
 [sponsor]: http://www.goatcounter.com/contribute
 [www]: https://www.goatcounter.com
 
-## GoatCounter Lite (v3.1.3-lite)
+## GoatCounter Lite (v3.2.0-lite)
 
 This is a customized high-performance version of GoatCounter featuring:
 - **Modern Dashboard**: A fully rewritten React-based dashboard with glassmorphism design and real-time feel.
