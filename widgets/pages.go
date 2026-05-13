@@ -79,10 +79,8 @@ func (w *Pages) GetData(ctx context.Context, a Args) (bool, error) {
 	w.Display, w.More, err = w.Pages.List(ctx, a.Rng, a.PathFilter, w.Exclude, w.Limit, a.Group)
 	errs.Append(err)
 
-	if !goatcounter.MustGetUser(ctx).Settings.FewerNumbers {
-		w.Diff, err = w.Pages.Diff(ctx, a.Rng, a.Rng)
-		errs.Append(err)
-	}
+	w.Diff, err = w.Pages.Diff(ctx, a.Rng, a.Rng)
+	errs.Append(err)
 
 	wg.Wait()
 
