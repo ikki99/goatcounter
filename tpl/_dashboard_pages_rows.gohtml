@@ -5,17 +5,19 @@
 		<td class="col-count">
 			<span>{{nformat $h.Count $.User}}</span><br>
 
-			{{$d := index $.Diff $i}}
-			<span
-				class="col-count-diff {{if is_inf $d}}{{else if gt $d 0.0}}plus{{else if lt $d 0.0}}minus{{end}}"
-				title="{{t $.Context "tooltip/change-period|Change compared to previous period"}}"
-			>
-				{{if is_inf $d}}
-					<i>{{t $.Context "new-paren|(new)"}}</i>
-				{{else}}
-					{{if gt $d 0.0}}+{{else if lt $d 0.0}}–{{end}}{{printf "%.0f" (max (round (abs $d) 0) 1)}}%
-				{{end}}
-			</span>
+			{{if lt $i (len $.Diff)}}
+				{{$d := index $.Diff $i}}
+				<span
+					class="col-count-diff {{if is_inf $d}}{{else if gt $d 0.0}}plus{{else if lt $d 0.0}}minus{{end}}"
+					title="{{t $.Context "tooltip/change-period|Change compared to previous period"}}"
+				>
+					{{if is_inf $d}}
+						<i>{{t $.Context "new-paren|(new)"}}</i>
+					{{else}}
+						{{if gt $d 0.0}}+{{else if lt $d 0.0}}–{{end}}{{printf "%.0f" (max (round (abs $d) 0) 1)}}%
+					{{end}}
+				</span>
+			{{end}}
 		</td>
 		<td class="col-path hide-mobile">
 			<a class="load-refs rlink" title="{{$h.Path}}" href="#">{{$h.Path}}</a><br>
