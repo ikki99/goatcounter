@@ -600,6 +600,75 @@
       font-size: 0.875rem;
     }
 
+    /* ====== MODAL ====== */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.2s ease;
+    }
+    .modal-content {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+      animation: zoomIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-body { padding: 24px; }
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+    /* ====== CAMPAIGN GENERATOR ====== */
+    .gen-link-box {
+      background: var(--bg-surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 20px;
+      word-break: break-all;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      position: relative;
+    }
+    .copy-toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--accent);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      z-index: 2000;
+      animation: fadeUp 0.3s ease;
+    }
+
     /* ====== REFERRER PANEL (expanded path) ====== */
     .ref-panel {
       grid-column: 1 / -1;
@@ -2466,6 +2535,93 @@
     });
 
     // ============================================================
+    // CAMPAIGN GENERATOR
+    // ============================================================
+    const CampaignGenerator = memo(({ isOpen, onClose }) => {
+      const [url, setUrl] = useState('');
+      const [campaign, setCampaign] = useState('');
+      const [source, setSource] = useState('');
+      const [showToast, setShowToast] = useState(false);
+
+      const generatedLink = useMemo(() => {
+        if (!url) return '';
+        try {
+          const u = new URL(url.startsWith('http') ? url : `https://${url}`);
+          if (campaign) u.searchParams.set('utm_campaign', campaign);
+          if (source) u.searchParams.set('utm_source', source);
+          return u.toString();
+        } catch (e) {
+          return 'Invalid URL';
+        }
+      }, [url, campaign, source]);
+
+      const copy = () => {
+        if (!generatedLink || generatedLink === 'Invalid URL') return;
+        navigator.clipboard.writeText(generatedLink);
+        setShowToast(true);
+        setTimeout(() => setShowToast(false), 2000);
+      };
+
+      if (!isOpen) return null;
+
+      return (
+        <div className="modal-overlay" onClick={onClose}>
+          <div className="modal-content" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 className="modal-title">营销链接生成器</h2>
+              <button style={{fontSize: '1.5rem', lineHeight: 1}} onClick={onClose}>×</button>
+            </div>
+            <div className="modal-body">
+              <p style={{fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 20}}>
+                输入你的网页地址和活动名称，系统将自动为你生成带追踪参数的链接。
+              </p>
+              <div className="field">
+                <label className="field-label">目标网页地址 (Target URL)</label>
+                <input
+                  placeholder="例如: example.com/product"
+                  value={url}
+                  onChange={e => setUrl(e.target.value)}
+                />
+              </div>
+              <div className="field">
+                <label className="field-label">营销活动名称 (utm_campaign)</label>
+                <input
+                  placeholder="例如: summer_sale, 双11"
+                  value={campaign}
+                  onChange={e => setCampaign(e.target.value)}
+                />
+              </div>
+              <div className="field">
+                <label className="field-label">流量来源 (utm_source / 可选)</label>
+                <input
+                  placeholder="例如: wechat, twitter, email"
+                  value={source}
+                  onChange={e => setSource(e.target.value)}
+                />
+              </div>
+
+              {generatedLink && (
+                <div className="gen-link-box">
+                  <div style={{color: 'var(--text-secondary)', fontSize: '0.7rem', marginBottom: 4, textTransform: 'uppercase'}}>生成结果:</div>
+                  <div style={{color: generatedLink === 'Invalid URL' ? 'var(--danger)' : 'var(--accent)'}}>{generatedLink}</div>
+                </div>
+              )}
+            </div>
+            <div className="modal-footer">
+              <button className="btn" style={{background: 'var(--bg-surface-2)'}} onClick={onClose}>关闭</button>
+              <button
+                className="btn btn-primary"
+                disabled={!generatedLink || generatedLink === 'Invalid URL'}
+                onClick={copy}
+              >复制链接</button>
+            </div>
+          </div>
+          {showToast && <div className="copy-toast">链接已成功复制到剪贴板！</div>}
+        </div>
+      );
+    });
+
+    // ============================================================
     // DASHBOARD
     // ============================================================
     function Dashboard({ config, onDisconnect, theme, toggleTheme, demoMode = false }) {
@@ -2479,6 +2635,7 @@
       const [prevTotal, setPrevTotal] = useState(null);
       const [authErr, setAuthErr] = useState(null); // only fatal: bad auth
       const [menuOpen, setMenuOpen] = useState(false);
+      const [showGenerator, setShowGenerator] = useState(false);
       const [refreshTick, setRefreshTick] = useState(0);
       const [lastUpdatedAt, setLastUpdatedAt] = useState(null);
       const [progress, setProgress] = useState({ fired: 0, done: 0 });
@@ -2908,9 +3065,13 @@
                       <>
                         <button onClick={() => {
                           setMenuOpen(false);
+                          setShowGenerator(true);
+                        }}>🔗 营销链接生成器</button>
+                        <button onClick={() => {
+                          setMenuOpen(false);
                           APIClient.clearCache(config.baseURL);
                           setRefreshTick(t => t + 1);
-                        }}>↻ Refresh data</button>
+                        }}>↻ 刷新数据</button>
                         <hr />
                       </>
                     )}
