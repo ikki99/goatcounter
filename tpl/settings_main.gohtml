@@ -94,6 +94,87 @@
 			{{end}}
 		</fieldset>
 
+		<fieldset id="section-campaign-gen">
+			<legend>{{.T "header/campaign-generator|营销链接生成器 (Marketing Link Generator)"}}</legend>
+			<p>{{.T "p/campaign-gen-help|输入目标网址和活动名称，系统将自动为你生成带追踪参数的链接。"}}</p>
+
+			<div class="field">
+				<label for="gen-url" style="display:block; margin-bottom: 0.5em;">{{.T "label/target-url|目标网页地址 (Target URL)"}}</label>
+				<input type="text" id="gen-url" placeholder="例如: example.com/page" style="width: 100%;">
+			</div>
+
+			<div class="field" style="margin-top: 1em;">
+				<label for="gen-campaign" style="display:block; margin-bottom: 0.5em;">{{.T "label/campaign-name|营销活动名称 (utm_campaign)"}}</label>
+				<input type="text" id="gen-campaign" placeholder="例如: summer_sale" style="width: 100%;">
+			</div>
+
+			<div class="field" style="margin-top: 1em;">
+				<label for="gen-source" style="display:block; margin-bottom: 0.5em;">{{.T "label/source|流量来源 (utm_source / 可选)"}}</label>
+				<input type="text" id="gen-source" placeholder="例如: wechat, twitter" style="width: 100%;">
+			</div>
+
+			<div id="gen-result-wrap" style="display:none; margin-top: 1.5em; padding: 1em; background: rgba(0,0,0,0.05); border-radius: 4px; border: 1px solid #ddd;">
+				<label style="display:block; margin-bottom: 0.5em; font-weight: bold;">{{.T "label/generated-link|生成的追踪链接:"}}</label>
+				<div style="display: flex; gap: 0.5em; align-items: center;">
+					<input type="text" id="gen-result" readonly style="flex: 1; font-family: monospace; background: white; border: 1px solid #ccc; padding: 6px; color: #14b8a6;">
+					<button type="button" id="gen-copy" class="btn-s" style="padding: 6px 12px; cursor: pointer; white-space: nowrap;">{{.T "button/copy|复制链接"}}</button>
+				</div>
+			</div>
+
+			<script>
+				(function() {
+					function init() {
+						var url = document.getElementById('gen-url');
+						var camp = document.getElementById('gen-campaign');
+						var src = document.getElementById('gen-source');
+						var res = document.getElementById('gen-result');
+						var wrap = document.getElementById('gen-result-wrap');
+						var copy = document.getElementById('gen-copy');
+						if (!url || !res) return;
+
+						function update() {
+							var uStr = url.value.trim();
+							if (!uStr) {
+								wrap.style.display = 'none';
+								return;
+							}
+							
+							try {
+								var processed = uStr;
+								if (!/^https?:\/\//i.test(processed)) processed = 'https://' + processed;
+								var u = new URL(processed);
+								if (camp.value.trim()) u.searchParams.set('utm_campaign', camp.value.trim());
+								if (src.value.trim()) u.searchParams.set('utm_source', src.value.trim());
+								res.value = u.toString();
+								wrap.style.display = 'block';
+							} catch (e) {
+								res.value = 'Invalid URL';
+								wrap.style.display = 'block';
+							}
+						}
+
+						url.addEventListener('input', update);
+						camp.addEventListener('input', update);
+						src.addEventListener('input', update);
+
+						copy.addEventListener('click', function() {
+							res.select();
+							document.execCommand('copy');
+							var old = copy.innerText;
+							copy.innerText = '已复制!';
+							setTimeout(function() { copy.innerText = old; }, 2000);
+						});
+					}
+
+					if (document.readyState === 'loading') {
+						document.addEventListener('DOMContentLoaded', init);
+					} else {
+						init();
+					}
+				})();
+			</script>
+		</fieldset>
+
 		<fieldset id="section-tracking">
 			<legend>{{.T "header/tracking|Tracking"}}</legend>
 
