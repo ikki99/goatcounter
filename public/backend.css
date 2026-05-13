@@ -148,8 +148,8 @@ small.go           { display: none; }
         "count path"
         "detail detail";
     align-items: center;
-    gap: 4px 16px;
-    padding: 12px 0;
+    gap: 0 16px;
+    padding: 8px 0;
     border-bottom: 1px solid var(--border);
     transition: background-color 0.2s;
 }
@@ -161,6 +161,7 @@ small.go           { display: none; }
 .col-path  { 
     grid-area: path;
     font-size: 0.95rem !important;
+    padding: 4px 0;
 }
 .count-list tr td:last-child { 
     grid-area: detail;
@@ -169,7 +170,7 @@ small.go           { display: none; }
 
 .count-list td           { vertical-align: middle; padding: 0; min-width: 0; }
 .count-list th           { text-align: left; }
-.count-list .col-count   { width: 100%; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-top: 4px; }
+.count-list .col-count   { width: 100%; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-top: 0; }
 .count-list .col-count-diff { font-size:.75rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-left: 8px; }
 
 /* Totals chart specific fixes */
@@ -181,7 +182,7 @@ small.go           { display: none; }
     text-align: left;
     width: auto;
 }
-.pages-list >.load-btns                  { display:block; margin-top:-.7em; width:max-content; }
+.pages-list >.load-btns                  { display:block; margin-top: 10px; width:max-content; }
 .pages-list.pages-list-text >.load-btns  { margin-top:0; }
 .plus      { color: var(--plus); }
 .minus     { color: var(--minus); }
@@ -190,7 +191,7 @@ small.go           { display: none; }
 .count-list tr:target,
 .count-list tr.target             { background-color: rgba(20, 184, 166, 0.05); }
 .count-list tr:target .load-refs,
-.count-list tr.target .load-refs  { font-weight: bold; border-bottom: 2px solid var(--accent); }
+.count-list tr.target .load-refs  { font-weight: bold; color: var(--accent); }
 tr.target small.go                { display: inline-block; }
 
 /* Border doesn't affect layout. */
@@ -201,29 +202,40 @@ tr.target small.go                { display: inline-block; }
     max-height: 0;
     opacity: 0;
     overflow: hidden;
-    margin-top: 0;
-    padding-left: 80px;
+    margin: 0 !important;
+    padding: 0 0 0 80px !important;
     visibility: hidden;
-    transition: max-height 0.3s ease, opacity 0.3s ease, margin-top 0.3s ease;
+    border: none !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* SHOW when row is active (targeted) */
 .count-list tr.target .chart {
-    max-height: 60px; /* Enough for 50px chart + margins */
+    max-height: 80px;
     opacity: 1;
-    margin-top: 12px;
+    margin-top: 12px !important;
+    margin-bottom: 8px !important;
     visibility: visible;
 }
 
 .count-list tr.target .hchart.refs {
-    max-height: 2000px; /* Arbitrary large value */
+    max-height: 2000px;
     opacity: 1;
-    margin-top: 12px;
+    margin-top: 8px !important;
+    margin-bottom: 16px !important;
+    padding: 16px !important; /* Reset padding for card */
+    padding-left: 16px !important;
+    margin-left: 80px !important;
+    width: calc(100% - 100px) !important;
     visibility: visible;
+    background: rgba(0,0,0,0.1) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
 }
 
 .chart canvas {
     background: transparent !important;
+    width: 100% !important;
 }
 
 @keyframes slideDown {
