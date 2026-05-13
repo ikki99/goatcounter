@@ -170,7 +170,7 @@ small.go           { display: none; }
 
 .count-list td           { vertical-align: middle; padding: 0; min-width: 0; }
 .count-list th           { text-align: left; }
-.count-list .col-count   { width: 100%; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-top: 0; }
+.count-list .col-count   { width: 100%; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 600; color: var(--text); margin-top: 0; }
 .count-list .col-count-diff { font-size:.75rem; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; margin-left: 8px; }
 
 /* Totals chart specific fixes */
