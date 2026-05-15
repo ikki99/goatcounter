@@ -175,6 +175,41 @@
 		$('#settings-secret').on('change', function(e) {
 			$('#secret-url').val(`${location.protocol}//${location.host}${BASE_PATH}?access-token=${this.value}`)
 		}).trigger('change')
+
+		// Marketing Link Generator.
+		var update_gen = function() {
+			var uStr = $('#gen-url').val().trim();
+			if (!uStr) {
+				$('#gen-result-wrap').hide();
+				return;
+			}
+			try {
+				var processed = uStr.match(/^https?:\/\//i) ? uStr : 'https://' + uStr;
+				var u = new URL(processed);
+				var cVal = $('#gen-campaign').val().trim();
+				var sVal = $('#gen-source').val().trim();
+				if (cVal) u.searchParams.set('utm_campaign', cVal);
+				else u.searchParams.delete('utm_campaign');
+				if (sVal) u.searchParams.set('utm_source', sVal);
+				else u.searchParams.delete('utm_source');
+				$('#gen-result').val(u.toString());
+				$('#gen-result-wrap').show();
+			} catch (e) {
+				$('#gen-result').val('Invalid URL');
+				$('#gen-result-wrap').show();
+			}
+		};
+		$('#gen-url, #gen-campaign, #gen-source').on('input change keyup', update_gen);
+		$('#gen-copy').on('click', function() {
+			$('#gen-result').select();
+			try {
+				document.execCommand('copy');
+				var btn = $(this), old = btn.text();
+				btn.text('已复制!');
+				setTimeout(function() { btn.text(old); }, 2000);
+			} catch (err) {}
+		});
+		update_gen();
 	}
 
 	var page_user_pref = function() {

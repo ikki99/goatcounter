@@ -90,17 +90,22 @@
 					<button class="link">{{.T "top-nav/sign-out|Sign out"}}</button>
 				</form>
 			</div>
-		{{else if and (.Site.Settings.IsPublic) (not .HideUI)}}
+		{{else if not .HideUI}}
 			<div style="margin-left: .3em;">
-				{{if .Site.LinkDomain -}}
-					{{.T "top-nav/public-link|Analytics for %(domain)."
-						(tag "a" (printf `target="_blank" rel="noopener" href="%s"` (.Site.LinkDomainURL true)) .Site.LinkDomain)
-					}}
+				{{if .Site.Settings.IsPublic}}
+					{{if .Site.LinkDomain -}}
+						{{.T "top-nav/public-link|Analytics for %(domain)."
+							(tag "a" (printf `target="_blank" rel="noopener" href="%s"` (.Site.LinkDomainURL true)) .Site.LinkDomain)
+						}}
+					{{end}}
+					{{.T "top-nav/public-time|The public view is updated once an hour; all times are in %(timezone-name) (%(timezone-offset))." (map
+						"timezone-name"   (join .User.Settings.Timezone.Abbr ", ")
+						"timezone-offset" .User.Settings.Timezone.OffsetDisplay
+					)}}
+				{{else}}
+					{{/* For secret sites, we show a simplified message if not signed in */}}
+					{{.T "top-nav/secret-site|This is a private view."}}
 				{{end}}
-				{{.T "top-nav/public-time|The public view is updated once an hour; all times are in %(timezone-name) (%(timezone-offset))." (map
-					"timezone-name"   (join .User.Settings.Timezone.Abbr ", ")
-					"timezone-offset" .User.Settings.Timezone.OffsetDisplay
-				)}}
 			</div>
 			<div id="signin"><a href="{{.Base}}/user/new">{{.T "top-nav/sign-in|Sign in"}}</a></div>
 		{{- end -}}

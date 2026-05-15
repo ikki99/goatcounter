@@ -101,7 +101,14 @@ var (
 
 	keyAuth = auth.Add(func(ctx context.Context, key string) (auth.User, error) {
 		u := &goatcounter.User{}
+		if key == "" {
+			return u, nil
+		}
+
 		err := u.ByTokenAndSite(ctx, key)
+		if err != nil {
+			log.Module("auth").Infof(ctx, "session auth failed for token %q: %s", key[:8]+"...", err)
+		}
 		return u, err
 	}, "/bosmang/profile/setrate")
 )

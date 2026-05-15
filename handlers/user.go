@@ -9,6 +9,7 @@ import (
 	"net/mail"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -169,9 +170,13 @@ func (h user) requestLogin(w http.ResponseWriter, r *http.Request) error {
 	err = bcrypt.CompareHashAndPassword(user.Password, []byte(args.Password))
 	if err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			log.Module("auth").Infof(r.Context(), "login failed: wrong password for %q (site %d)", args.Email, Site(r.Context()).ID)
 			zhttp.FlashError(w, r, T(r.Context(), "error/login-wrong-pwd|Wrong password for %(email)", args.Email))
+		} else if zdb.ErrNoRows(err) {
+			log.Module("auth").Infof(r.Context(), "login failed: user %q not found (site %d)", args.Email, Site(r.Context()).ID)
+			zhttp.FlashError(w, r, T(r.Context(), "error/login-not-found|User %(email) not found", args.Email))
 		} else {
-			zhttp.FlashError(w, r, "Something went wrong :-( An error has been logged for investigation.") // TODO: should be more generic
+			zhttp.FlashError(w, r, "Something went wrong :-( An error has been logged for investigation.")
 			log.Error(r.Context(), err, log.AttrHTTP(r))
 		}
 		return zhttp.SeeOther(w, "/user/new?email="+url.QueryEscape(args.Email))
@@ -478,8 +483,18 @@ func (h user) verify(w http.ResponseWriter, r *http.Request) error {
 // Make sure to use the correct cookie, since both "custom.example.com" and
 // "example.goatcounter.com" will work if you're using a custom domain.
 func cookieDomain(site *goatcounter.Site, r *http.Request) string {
+	if !goatcounter.Config(r.Context()).GoatcounterCom {
+		return "" // Use current host for self-hosted.
+	}
+
 	if r.Host == site.Domain(r.Context()) {
 		return site.Domain(r.Context())
 	}
-	return goatcounter.Config(r.Context()).Domain
+
+	// For SaaS, fallback to the configured global domain.
+	d := goatcounter.Config(r.Context()).Domain
+	if i := strings.Index(d, ","); i >= 0 {
+		d = d[:i]
+	}
+	return d
 }

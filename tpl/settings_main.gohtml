@@ -121,58 +121,6 @@
 				</div>
 			</div>
 
-			<script>
-				(function() {
-					function init() {
-						var url = document.getElementById('gen-url');
-						var camp = document.getElementById('gen-campaign');
-						var src = document.getElementById('gen-source');
-						var res = document.getElementById('gen-result');
-						var wrap = document.getElementById('gen-result-wrap');
-						var copy = document.getElementById('gen-copy');
-						if (!url || !res) return;
-
-						function update() {
-							var uStr = url.value.trim();
-							if (!uStr) {
-								wrap.style.display = 'none';
-								return;
-							}
-							
-							try {
-								var processed = uStr;
-								if (!/^https?:\/\//i.test(processed)) processed = 'https://' + processed;
-								var u = new URL(processed);
-								if (camp.value.trim()) u.searchParams.set('utm_campaign', camp.value.trim());
-								if (src.value.trim()) u.searchParams.set('utm_source', src.value.trim());
-								res.value = u.toString();
-								wrap.style.display = 'block';
-							} catch (e) {
-								res.value = 'Invalid URL';
-								wrap.style.display = 'block';
-							}
-						}
-
-						url.addEventListener('input', update);
-						camp.addEventListener('input', update);
-						src.addEventListener('input', update);
-
-						copy.addEventListener('click', function() {
-							res.select();
-							document.execCommand('copy');
-							var old = copy.innerText;
-							copy.innerText = '已复制!';
-							setTimeout(function() { copy.innerText = old; }, 2000);
-						});
-					}
-
-					if (document.readyState === 'loading') {
-						document.addEventListener('DOMContentLoaded', init);
-					} else {
-						init();
-					}
-				})();
-			</script>
 		</fieldset>
 
 		<fieldset id="section-tracking">
